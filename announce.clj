@@ -10,9 +10,6 @@
 
 
   
-(def announce-the-time-domain "com.apple.speech.synthesis.general.prefs")
-(def announce-the-time-key "TimeAnnouncementPrefs")
-(def announce-the-time-enabled-key "TimeAnnouncementsEnabled")
 
 (defn set-boolean-pref
 "Set a boolean nested preference"
@@ -20,7 +17,7 @@
     (let [domain (str (System/getProperty "home") "/Library/Preferences/" domain-name)]
     (sh "defaults" "write" domain key "-dict-add" nested-key "-bool" (if flag "YES" "NO"))))
 
-(def set-announce-flag (partial set-boolean-pref announce-the-time-domain announce-the-time-key announce-the-time-enabled-key))
+(def set-announce-flag (partial set-boolean-pref "com.apple.speech.synthesis.general.prefs" "TimeAnnouncementPrefs"  "TimeAnnouncementsEnabled"))
 
 (defn service-specifier
   "get the launchctl specifier"
