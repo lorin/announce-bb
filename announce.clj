@@ -20,32 +20,33 @@
     (let [domain (str (System/getProperty "home") "/Library/Preferences/" domain-name)]
     (sh "defaults" "write" domain key "-dict-add" nested-key "-bool" (if flag "YES" "NO"))))
 
-(def set-announce-the-time-flag (partial set-boolean-pref announce-the-time-domain announce-the-time-key announce-the-time-enabled-key))
+(def set-announce-flag (partial set-boolean-pref announce-the-time-domain announce-the-time-key announce-the-time-enabled-key))
 
+(defn service-specifier
+  "get the launchctl specifier"
+  [service-name]
+  (let [uid  (-> (sh "id" "-u") :out trim)]
+    (str "gui/" uid "/" service-name)))
 
 (defn start-service
   [service-name]
-  (let [uid (trim (:out (sh "id" "-u")))
-        service (str "gui/" uid "/" service-name)]
-    (sh "launchctl" "kickstart" service)))
+  (sh "launchctl" "kickstart" (service-specifier service-name)))
   
 (defn stop-service
 [service-name]  
-  (let [uid (trim (:out (sh "id" "-u")))
-        service (str "gui/" uid "/" service-name)]
-    (sh "launchctl" "kill" "SIGTERM" service)))
+    (sh "launchctl" "kill" "SIGTERM" (service-specifier service-name)))
   
 (def speech-synthesis-server-name "com.apple.speech.synthesisserver")
 
 
 (defn turn-on
   []
-  (set-announce-the-time-flag true)
+  (set-announce-flag true)
   (start-service speech-synthesis-server-name))
 
 (defn turn-off
   []
-  (set-announce-the-time-flag false)
+  (set-announce-flag false)
   (stop-service speech-synthesis-server-name))
   
 (defn print-usage
