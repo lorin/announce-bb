@@ -42,11 +42,19 @@
         service (str "gui/" uid "/" service-name)]
     (sh "launchctl" "kickstart" service)))
   
-
+(defn stop-service
+[service-name]  
+  (let [uid (trim (:out (sh "id" "-u")))
+        service (str "gui/" uid "/" service-name)]
+    (sh "launchctl" "kill" "SIGTERM" service)))
+  
 (defn start-speech-synthesis-server
   []
   (start-service "com.apple.speech.synthesisserver"))
 
+(defn stop-speech-synthesis-server
+  []
+  (stop-service "com.apple.speech.synthesisserver"))
 
 (defn turn-on
   []
@@ -56,7 +64,8 @@
 (defn turn-off
   []
   (unset-announce-the-time-pref)
-  (println "turn it off!"))
+  (stop-speech-synthesis-server))
+  
 
 (defn check-status
   []
