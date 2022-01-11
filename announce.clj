@@ -8,9 +8,6 @@
     announce on
     announce off")
 
-
-  
-
 (defn set-boolean-pref
 "Set a boolean nested preference"
   [domain-name key nested-key flag]
