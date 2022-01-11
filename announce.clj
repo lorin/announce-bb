@@ -1,5 +1,7 @@
 #!/usr/bin/env bb
-(ns announce)
+(ns announce
+  (:require [clojure.string :refer [replace-first trim]])
+  (:require [clojure.java.shell :refer [sh]]))
 
 (def usage "Usage:
 
@@ -7,9 +9,26 @@
     announce off
     announce status")
 
+(defn expand-home [s]
+  (if (.startsWith s "~")
+    (replace-first s "~" (System/getProperty "user.home"))
+    s))
+
+(defn set-announce-the-time-pref
+  []
+  (sh "defaults" "write"  (expand-home "~/Library/Preferences/com.apple.speech.synthesis.general.prefs") "TimeAnnouncementPrefs" "-dict-add" "TimeAnnouncementsEnabled" "-bool" "YES"))
+
+
+(defn start-speech-synthesis-server
+  []
+  (let [uid (trim (:out (sh "id" "-u")))]
+    (sh "launchctl" "kickstart" (str "gui/" uid " /com.apple.speech.synthesisserver"))))
+
+
 (defn turn-on
   []
-  (println "turn it on!"))
+  (set-announce-the-time-pref)
+  (start-speech-synthesis-server))
 
 (defn turn-off
   []
