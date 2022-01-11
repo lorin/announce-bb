@@ -14,7 +14,11 @@
     (let [domain (str (System/getProperty "home") "/Library/Preferences/" domain-name)]
     (sh "defaults" "write" domain key "-dict-add" nested-key "-bool" (if flag "YES" "NO"))))
 
-(def set-announce-flag (partial set-boolean-pref "com.apple.speech.synthesis.general.prefs" "TimeAnnouncementPrefs"  "TimeAnnouncementsEnabled"))
+(def set-announce-flag
+  (partial set-boolean-pref
+           "com.apple.speech.synthesis.general.prefs"
+           "TimeAnnouncementPrefs"
+           "TimeAnnouncementsEnabled"))
 
 (defn service-specifier
   "get the launchctl specifier"
