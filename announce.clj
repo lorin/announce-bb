@@ -14,15 +14,38 @@
     (replace-first s "~" (System/getProperty "user.home"))
     s))
 
+(defn set-pref
+  "Set the value in a nested key"
+  [domain-name key nested-key]
+  (let [domain (str (System/getProperty "home") "/Library/Preferences/" domain-name)]
+    (sh "defaults" "write" domain key "-dict-add" nested-key "-bool" "YES")))
+
+
+(defn unset-pref
+  "Set the value in a nested key"
+  [domain-name key nested-key]
+  (let [domain (str (System/getProperty "home") "/Library/Preferences/" domain-name)]
+    (sh "defaults" "write" domain key "-dict-add" nested-key "-bool" "NO")))
+
 (defn set-announce-the-time-pref
   []
-  (sh "defaults" "write"  (expand-home "~/Library/Preferences/com.apple.speech.synthesis.general.prefs") "TimeAnnouncementPrefs" "-dict-add" "TimeAnnouncementsEnabled" "-bool" "YES"))
+  (set-pref "com.apple.speech.synthesis.general.prefs" "TimeAnnouncementPrefs" "TimeAnnouncementsEnabled"))
 
+(defn unset-announce-the-time-pref
+  []
+  (unset-pref "com.apple.speech.synthesis.general.prefs" "TimeAnnouncementPrefs" "TimeAnnouncementsEnabled"))
+
+
+(defn start-service
+  [service-name]
+  (let [uid (trim (:out (sh "id" "-u")))
+        service (str "gui/" uid "/" service-name)]
+    (sh "launchctl" "kickstart" service)))
+  
 
 (defn start-speech-synthesis-server
   []
-  (let [uid (trim (:out (sh "id" "-u")))]
-    (sh "launchctl" "kickstart" (str "gui/" uid " /com.apple.speech.synthesisserver"))))
+  (start-service "com.apple.speech.synthesisserver"))
 
 
 (defn turn-on
@@ -32,6 +55,7 @@
 
 (defn turn-off
   []
+  (unset-announce-the-time-pref)
   (println "turn it off!"))
 
 (defn check-status
